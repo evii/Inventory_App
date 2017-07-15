@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">Inventory_App</string>
+    <string name="category_overview">Overview</string>
+    <string name="hint_product_name">Product Name</string>
+    <string name="product_info">Product info</string>
+    <string name="hint_product_quantity">quantity</string>
+    <string name="hint_product_price">price</string>
+    <string name="pieces">pcs</string>
+    <string name="CZK">CZK</string>
+    <string name="category_supplier">Supplier</string>
+    <string name="hint_supplier_address">Email address</string>
+    <string name="action_insert_dummy_data">Insert dummy data</string>
+    <string name="action_delete_all_entries">Delete all entries</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+    <string name="editor_activity_title_new_product">Add new product</string>
+    <string name="editor_activity_title_edit_product">Edit product</string>
+    <string name="editor_insert_product_failed">Failed to insert product.</string>
+    <string name="editor_insert_product_successful">Product inserted.</string>
+    <string name="editor_update_product_failed">Update failed.</string>
+    <string name="editor_update_product_successful">Update successful.</string>
+    <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
+    <string name="discard">Discard</string>
+    <string name="keep_editing">Keep Editing</string>
+    <string name="delete_dialog_msg">Delete this pet?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="editor_delete_product_successful">Delete successful.</string>
+    <string name="editor_delete_product_failed">Delete failed.</string>
+    <string name="unknown_price">Price unknown</string>
+
+
+</resources>
