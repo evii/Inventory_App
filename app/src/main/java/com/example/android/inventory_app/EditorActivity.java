@@ -4,12 +4,17 @@ package com.example.android.inventory_app;
  * Created by evi on 15. 7. 2017.
  */
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
@@ -25,6 +30,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.app.AlertDialog;
@@ -32,6 +38,11 @@ import android.app.AlertDialog;
 import com.example.android.inventory_app.data.PolaroidContract.PolaroidEntry;
 import com.example.android.inventory_app.data.PolaroidProvider;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static android.R.attr.data;
 import static android.R.id.message;
 
 /**
@@ -73,6 +84,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
      */
     public static final String LOG_TAG = EditorActivity.class.getSimpleName();
 
+    private static final int PICK_IMAGE_REQUEST = 0;
+
+    // Uri of picture
+    private Uri mUri;
+
+    ImageView mProductImageView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,6 +122,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mQuantityEditText = (EditText) findViewById(R.id.edit_quantity);
         mPriceEditText = (EditText) findViewById(R.id.edit_price);
         mSupplierEditText = (EditText) findViewById(R.id.edit_supplier_address);
+        mProductImageView = (ImageView) findViewById(R.id.product_ImageView);
 
         // Setup OnTouchListeners on all the input fields, so we can determine if the user
         // has touched or modified them. This will let us know if there are unsaved changes
@@ -112,15 +131,34 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mQuantityEditText.setOnTouchListener(mTouchListener);
         mPriceEditText.setOnTouchListener(mTouchListener);
         mSupplierEditText.setOnTouchListener(mTouchListener);
+        mProductImageView.setOnTouchListener(mTouchListener);
 
-        Button editPictureButton = (Button) findViewById(R.id.button_edit_picture);
-
+        // set up of buttons for image - in Edit mode and in Insert mode
+        //for Edit mode
+        ImageView editPictureButton = (ImageView) findViewById(R.id.button_edit_picture);
         editPictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                openImageSelector();
+            }
+        });
 
-        }});
+        //for Insert mode
+        ImageView uploadPictureButton = (ImageView) findViewById(R.id.button_upload_picture);
+        uploadPictureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openImageSelector();
+            }
+        });
 
+        //Set proper visibility for image button - different for edit and upload mode
+        if (mCurrentPolaroidUri == null) {
+            editPictureButton.setVisibility(View.GONE);
+        }
+        else {
+            uploadPictureButton.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -168,6 +206,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String quantityString = mQuantityEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
         String supplierString = mSupplierEditText.getText().toString().trim();
+        String imageUriString = mUri.toString();
+
 
         // return if there is no data input while inserting a product
         if (mCurrentPolaroidUri == null &&
@@ -182,6 +222,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantityString);
         values.put(PolaroidEntry.COLUMN_POLAROID_PRICE, priceString);
         values.put(PolaroidEntry.COLUMN_POLAROID_SUPPLIER, supplierString);
+        values.put(PolaroidEntry.COLUMN_POLAROID_PICTURE, imageUriString);
 
         // If the price is not provided by the user, don't try to parse the string into an
         // integer value. Use 0 by default.
@@ -193,7 +234,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         if (mCurrentPolaroidUri == null) {
 
-// Insert the new row, returning the primary key value of the new row
+        // Insert the new row, returning the primary key value of the new row
             Uri newUri = getContentResolver().insert(PolaroidEntry.CONTENT_URI, values);
 
             if (newUri == null) {
@@ -319,7 +360,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 PolaroidEntry.COLUMN_POLAROID_NAME,
                 PolaroidEntry.COLUMN_POLAROID_QTY,
                 PolaroidEntry.COLUMN_POLAROID_PRICE,
-                PolaroidEntry.COLUMN_POLAROID_SUPPLIER};
+                PolaroidEntry.COLUMN_POLAROID_SUPPLIER,
+                PolaroidEntry.COLUMN_POLAROID_PICTURE};
 
         // This loader will execute the ContentProvider's query method on a background thread
         return new CursorLoader(this,   // Parent activity context
@@ -341,18 +383,23 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             int quantityColumnIndex = cursor.getColumnIndex(PolaroidEntry.COLUMN_POLAROID_QTY);
             int priceColumnIndex = cursor.getColumnIndex(PolaroidEntry.COLUMN_POLAROID_PRICE);
             int supplierColumnIndex = cursor.getColumnIndex(PolaroidEntry.COLUMN_POLAROID_SUPPLIER);
+            int pictureColumnIndex = cursor.getColumnIndex(PolaroidEntry.COLUMN_POLAROID_PICTURE);
 
             // Extract out the value from the Cursor for the given column index
             String name = cursor.getString(nameColumnIndex);
             int quantity = cursor.getInt(quantityColumnIndex);
             int price = cursor.getInt(priceColumnIndex);
             String supplier = cursor.getString(supplierColumnIndex);
+            String pictureString = cursor.getString(pictureColumnIndex);
+            Uri imageUri = Uri.parse(pictureString);
 
             // Update the views on the screen with the values from the database
             mNameEditText.setText(name);
             mQuantityEditText.setText(Integer.toString(quantity));
             mPriceEditText.setText(Integer.toString(price));
             mSupplierEditText.setText(supplier);
+            Bitmap imageBitmap = getBitmapFromUri(imageUri);
+            mProductImageView.setImageBitmap(imageBitmap);
 
         }
     }
@@ -365,6 +412,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mQuantityEditText.setText("");
         mPriceEditText.setText("");
         mSupplierEditText.setText("");
+       mProductImageView.setImageBitmap(null);
     }
 
     private void showUnsavedChangesDialog(
@@ -435,11 +483,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             finish();
         }
     }
+
     // method for + button - increase of quantity
     public void increaseQuantity(View view) {
         ContentValues values = new ContentValues();
         int quantity = Integer.parseInt(mQuantityEditText.getText().toString());
-        quantity = quantity +1;
+        quantity = quantity + 1;
         values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantity);
         int rowsAffected = getContentResolver().update(mCurrentPolaroidUri, values, null, null);
         // Show a toast message depending on whether or not the update was successful.
@@ -453,12 +502,13 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
 
     }
+
     // method for - button - decrease of quantity
     public void decreaseQuantity(View view) {
         ContentValues values = new ContentValues();
         int quantity = Integer.parseInt(mQuantityEditText.getText().toString());
-        quantity = quantity -1;
-        if (quantity <0) {
+        quantity = quantity - 1;
+        if (quantity < 0) {
             quantity = 0;
             Toast.makeText(this, getString(R.string.editor_no_available_products), Toast.LENGTH_LONG).show();
         }
@@ -473,8 +523,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             Log.v(LOG_TAG, getString(R.string.editor_update_product_successful));
         }
     }
+
     // method for Order button - intent with sending an order email
-    public void sendOrderEmail (View view) {
+    public void sendOrderEmail(View view) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         String supplierEmailAddress = mSupplierEditText.getText().toString().trim();
         intent.setData(Uri.parse("mailto:" + supplierEmailAddress));
@@ -485,5 +536,91 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             startActivity(intent);
         }
     }
+
+    //opens gallery of pictures in the device
+    public void openImageSelector() {
+        Intent intent;
+
+        if (Build.VERSION.SDK_INT < 19) {
+            intent = new Intent(Intent.ACTION_GET_CONTENT);
+        } else {
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+        }
+
+        intent.setType("image/*");
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        // The ACTION_OPEN_DOCUMENT intent was sent with the request code READ_REQUEST_CODE.
+        // If the request code seen here doesn't match, it's the response to some other intent,
+        // and the below code shouldn't run at all.
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
+            // The document selected by the user won't be returned in the intent.
+            // Instead, a URI to that document will be contained in the return intent
+            // provided to this method as a parameter.  Pull that uri using "resultData.getData()"
+
+            if (resultData != null) {
+                mUri = resultData.getData();
+                Log.i(LOG_TAG, "Uri of picture: " + mUri.toString());
+
+                mProductImageView.setImageBitmap(getBitmapFromUri(mUri));
+            }
+        }
+    }
+
+    public Bitmap getBitmapFromUri(Uri uri) {
+
+        if (uri == null || uri.toString().isEmpty())
+            return null;
+
+        // Get the dimensions of the View
+        int targetW = mProductImageView.getWidth();
+        int targetH = mProductImageView.getHeight();
+
+        InputStream input = null;
+        try {
+            input = this.getContentResolver().openInputStream(uri);
+
+            // Get the dimensions of the bitmap
+            BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+            bmOptions.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(input, null, bmOptions);
+            input.close();
+
+            int photoW = bmOptions.outWidth;
+            int photoH = bmOptions.outHeight;
+
+            // Determine how much to scale down the image
+            int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+            // Decode the image file into a Bitmap sized to fill the View
+            bmOptions.inJustDecodeBounds = false;
+            bmOptions.inSampleSize = scaleFactor;
+            bmOptions.inPurgeable = true;
+
+            input = this.getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(input, null, bmOptions);
+            input.close();
+            return bitmap;
+
+        } catch (FileNotFoundException fne) {
+            Log.e(LOG_TAG, "Failed to load image.", fne);
+            return null;
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Failed to load image.", e);
+            return null;
+        } finally {
+            try {
+                input.close();
+            } catch (IOException ioe) {
+
+            }
+        }
+    }
+
 
 }

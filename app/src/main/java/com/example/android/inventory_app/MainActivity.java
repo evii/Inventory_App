@@ -30,9 +30,10 @@ import static android.drm.DrmStore.DrmObjectType.CONTENT;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
-    // TODO: obrazky ukladani do db
-    // TODO: obrazek edit
+
+
     // TODO: zkontrolovat checky na prazdne policka
+    // TODO: zkontrolovat listenery zmeny - aby byly i na obr.
     // TODO: zkontrolovat pet jestli tam neni
     // TODO: zarovnat a vycistut
 
@@ -97,6 +98,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         values.put(PolaroidEntry.COLUMN_POLAROID_QTY, 5);
         values.put(PolaroidEntry.COLUMN_POLAROID_PRICE, 3990);
         values.put(PolaroidEntry.COLUMN_POLAROID_SUPPLIER, "supply@polaroid.com");
+        values.put(PolaroidEntry.COLUMN_POLAROID_PICTURE, "content://com.android.providers.media.documents/document/image%3A47343");
+
+
 
 // Insert the new row, returning the primary key value of the new row
         Uri newUri = getContentResolver().insert(PolaroidEntry.CONTENT_URI, values);
