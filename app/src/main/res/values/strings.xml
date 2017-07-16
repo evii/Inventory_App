@@ -22,7 +22,7 @@
     <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
     <string name="discard">Discard</string>
     <string name="keep_editing">Keep Editing</string>
-    <string name="delete_dialog_msg">Delete this pet?</string>
+    <string name="delete_dialog_msg">Delete this product?</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="editor_delete_product_successful">Delete successful.</string>
@@ -32,6 +32,7 @@
     <string name="mail_subject">Ordering</string>
     <string name="adapter_update_product_failed">Update quantity by sell button failed.</string>
     <string name="adapter_update_product_successful">Update quantity by sell button successful.</string>
+    <string name="editor_image_not_inserted">Image not inserted.</string>
 
 
 </resources>

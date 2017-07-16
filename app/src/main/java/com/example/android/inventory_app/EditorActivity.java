@@ -206,17 +206,40 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String quantityString = mQuantityEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
         String supplierString = mSupplierEditText.getText().toString().trim();
-        String imageUriString = mUri.toString();
-
 
         // return if there is no data input while inserting a product
         if (mCurrentPolaroidUri == null &&
                 TextUtils.isEmpty(nameString) && TextUtils.isEmpty(quantityString) &&
-                TextUtils.isEmpty(priceString) && TextUtils.isEmpty(supplierString)) {
+                TextUtils.isEmpty(priceString) && TextUtils.isEmpty(supplierString)
+                && mUri == null) {
             return;
         }
+
+        // request at least name to be inserted
+        if(nameString.isEmpty())
+        {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("At least Name of the product must be inserted.")
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    // TODO: how to ensure to stay in the EditorActivity?
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();}
+
+
+        // when there is no image uploaded
+        String imageUriString = null;
+        if(mUri != null){
+            imageUriString = mUri.toString();
+        }else{
+            Log.v(LOG_TAG, getString(R.string.editor_image_not_inserted));
+        }
+
         // Create a ContentValues object where column names are the keys,
-// and product attributes are the values.
+        // and product attributes are the values.
         ContentValues values = new ContentValues();
         values.put(PolaroidEntry.COLUMN_POLAROID_NAME, nameString);
         values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantityString);
@@ -231,6 +254,15 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             price = Integer.parseInt(priceString);
         }
         values.put(PolaroidEntry.COLUMN_POLAROID_PRICE, price);
+
+        // If the quantity is not provided by the user, don't try to parse the string into an
+        // integer value. Use 0 by default.
+        int quantity = 0;
+        if (!TextUtils.isEmpty(quantityString)) {
+            quantity = Integer.parseInt(quantityString);
+        }
+        values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantity);
+
 
         if (mCurrentPolaroidUri == null) {
 
@@ -390,17 +422,23 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             int quantity = cursor.getInt(quantityColumnIndex);
             int price = cursor.getInt(priceColumnIndex);
             String supplier = cursor.getString(supplierColumnIndex);
+
+            // when picture is not uploaded
             String pictureString = cursor.getString(pictureColumnIndex);
-            Uri imageUri = Uri.parse(pictureString);
+             if (pictureString !=null){
+                Uri imageUri = Uri.parse(pictureString);
+                Bitmap imageBitmap = getBitmapFromUri(imageUri);
+                mProductImageView.setImageBitmap(imageBitmap);
+            }
+            else {
+                Log.v(LOG_TAG,getString(R.string.editor_image_not_inserted));
+            }
 
             // Update the views on the screen with the values from the database
             mNameEditText.setText(name);
             mQuantityEditText.setText(Integer.toString(quantity));
             mPriceEditText.setText(Integer.toString(price));
             mSupplierEditText.setText(supplier);
-            Bitmap imageBitmap = getBitmapFromUri(imageUri);
-            mProductImageView.setImageBitmap(imageBitmap);
-
         }
     }
 
@@ -566,7 +604,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             if (resultData != null) {
                 mUri = resultData.getData();
                 Log.i(LOG_TAG, "Uri of picture: " + mUri.toString());
-
                 mProductImageView.setImageBitmap(getBitmapFromUri(mUri));
             }
         }

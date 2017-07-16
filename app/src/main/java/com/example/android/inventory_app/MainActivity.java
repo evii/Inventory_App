@@ -33,7 +33,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
 
     // TODO: zkontrolovat checky na prazdne policka
-    // TODO: zkontrolovat listenery zmeny - aby byly i na obr.
+    //TODO: price unknown - zobrazovat
+    // TODO: grafiku doresit
     // TODO: zkontrolovat pet jestli tam neni
     // TODO: zarovnat a vycistut
 

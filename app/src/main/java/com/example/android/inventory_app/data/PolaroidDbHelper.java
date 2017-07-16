@@ -36,7 +36,7 @@ public class PolaroidDbHelper extends SQLiteOpenHelper
         String SQL_CREATE_POLAROID_TABLE =  "CREATE TABLE " + PolaroidEntry.TABLE_NAME + " ("
                 + PolaroidEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + PolaroidEntry.COLUMN_POLAROID_NAME + " TEXT NOT NULL, "
-                + PolaroidEntry.COLUMN_POLAROID_QTY + " INTEGER NOT NULL, "
+                + PolaroidEntry.COLUMN_POLAROID_QTY + " INTEGER DEFAULT 0, "
                 + PolaroidEntry.COLUMN_POLAROID_PRICE + " REAL, "
                 + PolaroidEntry.COLUMN_POLAROID_SUPPLIER + " TEXT, "
                 + PolaroidEntry.COLUMN_POLAROID_PICTURE + " TEXT);";
