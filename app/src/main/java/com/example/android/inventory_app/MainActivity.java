@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.inventory_app.data.PolaroidDbHelper;
 import com.example.android.inventory_app.data.PolaroidContract.PolaroidEntry;
@@ -28,6 +29,12 @@ import com.example.android.inventory_app.data.PolaroidProvider;
 import static android.drm.DrmStore.DrmObjectType.CONTENT;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+
+    // TODO: obrazky ukladani do db
+    // TODO: obrazek edit
+    // TODO: zkontrolovat checky na prazdne policka
+    // TODO: zkontrolovat pet jestli tam neni
+    // TODO: zarovnat a vycistut
 
     private static final int POLAROID_LOADER = 0;
     PolaroidCursorAdapter mCursorAdapter;
@@ -162,5 +169,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         int rowsDeleted = getContentResolver().delete(PolaroidEntry.CONTENT_URI, null, null);
         Log.v("MainActivity", rowsDeleted + " rows deleted from polaroid database");
     }
+
+
 }
 

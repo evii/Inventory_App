@@ -28,6 +28,10 @@
     <string name="editor_delete_product_successful">Delete successful.</string>
     <string name="editor_delete_product_failed">Delete failed.</string>
     <string name="unknown_price">Price unknown</string>
+    <string name="editor_no_available_products">No available products.</string>
+    <string name="mail_subject">Ordering</string>
+    <string name="adapter_update_product_failed">Update quantity by sell button failed.</string>
+    <string name="adapter_update_product_successful">Update quantity by sell button successful.</string>
 
 
 </resources>

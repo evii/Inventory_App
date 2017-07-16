@@ -7,12 +7,25 @@
     android:padding="16dp"
     tools:context=".EditorActivity">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
     <ImageView
         android:id="@+id/product_ImageView"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:src="@drawable/ic_add_circle_black_24dp" />
 
+        <Button
+            android:id="@+id/button_edit_picture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit"
+            android:layout_alignParentRight="true"
+            android:layout_alignBottom="@id/product_ImageView"
+            />
+    </RelativeLayout>
     <!-- Overview category -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -77,12 +90,14 @@
                 <Button
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
-                    android:text="+" />
+                    android:text="-"
+                    android:onClick="decreaseQuantity"/>
 
                 <Button
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
-                    android:text="-" />
+                    android:text="+"
+                    android:onClick="increaseQuantity"/>
 
             </LinearLayout>
 
@@ -134,12 +149,13 @@
                 android:width="0dp"
                 android:layout_weight="2"
                 android:hint="@string/hint_supplier_address"
-                android:inputType="number" />
+                android:inputType="textEmailAddress" />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Order" />
+                android:text="Order"
+                android:onClick="sendOrderEmail"/>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

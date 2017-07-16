@@ -3,6 +3,7 @@ package com.example.android.inventory_app;
 /**
  * Created by evi on 15. 7. 2017.
  */
+
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,23 +16,28 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.app.AlertDialog;
 
 import com.example.android.inventory_app.data.PolaroidContract.PolaroidEntry;
+import com.example.android.inventory_app.data.PolaroidProvider;
+
+import static android.R.id.message;
 
 /**
  * Allows user to create a new polaroid or edit an existing one.
  */
-public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     //EditText field to enter the polaroid products name
     private EditText mNameEditText;
@@ -40,7 +46,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private EditText mQuantityEditText;
 
     //EditText field to enter the peoduct's price
-     private EditText mPriceEditText;
+    private EditText mPriceEditText;
 
     //EditText field to enter the supplier
     private EditText mSupplierEditText;
@@ -62,6 +68,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     };
 
+    /**
+     * Tag for the log messages
+     */
+    public static final String LOG_TAG = EditorActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,9 +91,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             // Invalidate the options menu, so the "Delete" menu option can be hidden.
             // (It doesn't make sense to delete a polaroid that hasn't been created yet.)
             invalidateOptionsMenu();
-        }
-        else {
-            //otherwise it is an update of existing pet
+        } else {
+            //otherwise it is an update of existing product
             setTitle(getString(R.string.editor_activity_title_edit_product));
             // Prepare the loader.  Either re-connect with an existing one,
             // or start a new one.
@@ -103,47 +113,54 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mPriceEditText.setOnTouchListener(mTouchListener);
         mSupplierEditText.setOnTouchListener(mTouchListener);
 
-        //setupSpinner();
+        Button editPictureButton = (Button) findViewById(R.id.button_edit_picture);
+
+        editPictureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+        }});
+
     }
 
     /**
      * Setup the dropdown spinner that allows the user to select the gender of the pet.
-
-    private void setupSpinner() {
-        // Create adapter for spinner. The list options are from the String array it will use
-        // the spinner will use the default layout
-        ArrayAdapter genderSpinnerAdapter = ArrayAdapter.createFromResource(this,
-                R.array.array_gender_options, android.R.layout.simple_spinner_item);
-
-        // Specify dropdown layout style - simple list view with 1 item per line
-        genderSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-
-        // Apply the adapter to the spinner
-        mGenderSpinner.setAdapter(genderSpinnerAdapter);
-
-        // Set the integer mSelected to the constant values
-        mGenderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selection = (String) parent.getItemAtPosition(position);
-                if (!TextUtils.isEmpty(selection)) {
-                    if (selection.equals(getString(R.string.gender_male))) {
-                        mGender = PetEntry.GENDER_MALE; // Male
-                    } else if (selection.equals(getString(R.string.gender_female))) {
-                        mGender = PetEntry.GENDER_FEMALE; // Female
-                    } else {
-                        mGender = PetEntry.GENDER_UNKNOWN; // Unknown
-                    }
-                }
-            }
-
-            // Because AdapterView is an abstract class, onNothingSelected must be defined
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                mGender = 0; // Unknown
-            }
-        });
-    } */
+     * <p>
+     * private void setupSpinner() {
+     * // Create adapter for spinner. The list options are from the String array it will use
+     * // the spinner will use the default layout
+     * ArrayAdapter genderSpinnerAdapter = ArrayAdapter.createFromResource(this,
+     * R.array.array_gender_options, android.R.layout.simple_spinner_item);
+     * <p>
+     * // Specify dropdown layout style - simple list view with 1 item per line
+     * genderSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+     * <p>
+     * // Apply the adapter to the spinner
+     * mGenderSpinner.setAdapter(genderSpinnerAdapter);
+     * <p>
+     * // Set the integer mSelected to the constant values
+     * mGenderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+     *
+     * @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+     * String selection = (String) parent.getItemAtPosition(position);
+     * if (!TextUtils.isEmpty(selection)) {
+     * if (selection.equals(getString(R.string.gender_male))) {
+     * mGender = PetEntry.GENDER_MALE; // Male
+     * } else if (selection.equals(getString(R.string.gender_female))) {
+     * mGender = PetEntry.GENDER_FEMALE; // Female
+     * } else {
+     * mGender = PetEntry.GENDER_UNKNOWN; // Unknown
+     * }
+     * }
+     * }
+     * <p>
+     * // Because AdapterView is an abstract class, onNothingSelected must be defined
+     * @Override public void onNothingSelected(AdapterView<?> parent) {
+     * mGender = 0; // Unknown
+     * }
+     * });
+     * }
+     */
 
     // Gets user input from the editor and saves new polaroid into a database
     private void savePolaroid() {
@@ -152,14 +169,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String priceString = mPriceEditText.getText().toString().trim();
         String supplierString = mSupplierEditText.getText().toString().trim();
 
-        // return if there is no data input while inserting a pet
+        // return if there is no data input while inserting a product
         if (mCurrentPolaroidUri == null &&
                 TextUtils.isEmpty(nameString) && TextUtils.isEmpty(quantityString) &&
                 TextUtils.isEmpty(priceString) && TextUtils.isEmpty(supplierString)) {
             return;
         }
         // Create a ContentValues object where column names are the keys,
-// and pet attributes are the values.
+// and product attributes are the values.
         ContentValues values = new ContentValues();
         values.put(PolaroidEntry.COLUMN_POLAROID_NAME, nameString);
         values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantityString);
@@ -184,8 +201,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             } else {
                 Toast.makeText(this, getString(R.string.editor_insert_product_successful), Toast.LENGTH_LONG).show();
             }
-        }
-        else {
+        } else {
             // Otherwise this is an EXISTING product, so update the polaropid with content URI: mCurrentPolaroidUri
             // and pass in the new ContentValues. Pass in null for the selection and selection args
             // because mCurrentPolaroidUri will already identify the correct row in the database that
@@ -296,8 +312,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         // Now create and return a CursorLoader that will take care of
         // creating a Cursor for the data being displayed.
 
-        // Since the editor shows all pet attributes, define a projection that contains
-        // all columns from the pet table
+        // Since the editor shows all product attributes, define a projection that contains
+        // all columns from the product table
         String[] projection = {
                 PolaroidEntry._ID,
                 PolaroidEntry.COLUMN_POLAROID_NAME,
@@ -307,7 +323,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         // This loader will execute the ContentProvider's query method on a background thread
         return new CursorLoader(this,   // Parent activity context
-                mCurrentPolaroidUri,         // Query the content URI for the current pet
+                mCurrentPolaroidUri,         // Query the content URI for the current product
                 projection,             // Columns to include in the resulting Cursor
                 null,                   // No selection clause
                 null,                   // No selection arguments
@@ -320,7 +336,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 // Proceed with moving to the first row of the cursor and reading data from it
         // (This should be the only row in the cursor)
         if (cursor.moveToFirst()) {
-            // Find the columns of pet attributes that we're interested in
+            // Find the columns of product attributes that we're interested in
             int nameColumnIndex = cursor.getColumnIndex(PolaroidEntry.COLUMN_POLAROID_NAME);
             int quantityColumnIndex = cursor.getColumnIndex(PolaroidEntry.COLUMN_POLAROID_QTY);
             int priceColumnIndex = cursor.getColumnIndex(PolaroidEntry.COLUMN_POLAROID_PRICE);
@@ -338,8 +354,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mPriceEditText.setText(Integer.toString(price));
             mSupplierEditText.setText(supplier);
 
-            }
         }
+    }
 
 
     @Override
@@ -412,12 +428,62 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             // Show a toast message depending on whether or not the delete was successful.
             if (rowsDeleted == 0) {
                 Toast.makeText(this, getString(R.string.editor_delete_product_failed), Toast.LENGTH_LONG).show();
-            }
-            else {
+            } else {
                 Toast.makeText(this, getString(R.string.editor_delete_product_successful), Toast.LENGTH_LONG).show();
             }
             // Close the activity
             finish();
         }
     }
+    // method for + button - increase of quantity
+    public void increaseQuantity(View view) {
+        ContentValues values = new ContentValues();
+        int quantity = Integer.parseInt(mQuantityEditText.getText().toString());
+        quantity = quantity +1;
+        values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantity);
+        int rowsAffected = getContentResolver().update(mCurrentPolaroidUri, values, null, null);
+        // Show a toast message depending on whether or not the update was successful.
+        if (rowsAffected == 0) {
+            // If no rows were affected, then there was an error with the update.
+            Log.v(LOG_TAG, getString(R.string.editor_update_product_failed));
+        } else {
+            // Otherwise, the update was successful and we can log it.
+            Log.v(LOG_TAG, getString(R.string.editor_update_product_successful));
+        }
+
+
+    }
+    // method for - button - decrease of quantity
+    public void decreaseQuantity(View view) {
+        ContentValues values = new ContentValues();
+        int quantity = Integer.parseInt(mQuantityEditText.getText().toString());
+        quantity = quantity -1;
+        if (quantity <0) {
+            quantity = 0;
+            Toast.makeText(this, getString(R.string.editor_no_available_products), Toast.LENGTH_LONG).show();
+        }
+        values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantity);
+        int rowsAffected = getContentResolver().update(mCurrentPolaroidUri, values, null, null);
+        // Show a toast message depending on whether or not the update was successful.
+        if (rowsAffected == 0) {
+            // If no rows were affected, then there was an error with the update.
+            Log.v(LOG_TAG, getString(R.string.editor_update_product_failed));
+        } else {
+            // Otherwise, the update was successful and we can log it.
+            Log.v(LOG_TAG, getString(R.string.editor_update_product_successful));
+        }
+    }
+    // method for Order button - intent with sending an order email
+    public void sendOrderEmail (View view) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        String supplierEmailAddress = mSupplierEditText.getText().toString().trim();
+        intent.setData(Uri.parse("mailto:" + supplierEmailAddress));
+        String productName = mNameEditText.getText().toString().trim();
+        intent.putExtra(Intent.EXTRA_SUBJECT, getResources().
+                getString(R.string.mail_subject) + " " + productName);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
 }
