@@ -82,23 +82,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         });
     }
 
-    private void insertPolaroid() {
-
-// Create a ContentValues object where column names are the keys,
-// and dummy Polaroid attributes are the values.
-        ContentValues values = new ContentValues();
-        values.put(PolaroidEntry.COLUMN_POLAROID_NAME, "Polaroid SX-70 Alpha");
-        values.put(PolaroidEntry.COLUMN_POLAROID_QTY, 5);
-        values.put(PolaroidEntry.COLUMN_POLAROID_PRICE, 3990);
-        values.put(PolaroidEntry.COLUMN_POLAROID_SUPPLIER, "supply@polaroid.com");
-        values.put(PolaroidEntry.COLUMN_POLAROID_PICTURE, "content://com.android.providers.media.documents/document/image%3A47343");
-
-// Insert the new row, returning the primary key value of the new row
-        Uri newUri = getContentResolver().insert(PolaroidEntry.CONTENT_URI, values);
-        Log.v(LOG_TAG, "New URI: " + newUri);
-    }
-
-    @Override
+   @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu options from the res/menu/menu_catalog.xml file.
         // This adds menu items to the app bar.
@@ -110,11 +94,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public boolean onOptionsItemSelected(MenuItem item) {
         // User clicked on a menu option in the app bar overflow menu
         switch (item.getItemId()) {
-            // Respond to a click on the "Insert dummy data" menu option
-            case R.id.action_insert_dummy_data:
-                insertPolaroid();
 
-                return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
                 deleteAllPolaroids();

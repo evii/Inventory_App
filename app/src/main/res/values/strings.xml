@@ -9,7 +9,6 @@
     <string name="CZK">CZK</string>
     <string name="category_supplier">Supplier</string>
     <string name="hint_supplier_address">Email address</string>
-    <string name="action_insert_dummy_data">Insert dummy data</string>
     <string name="action_delete_all_entries">Delete all entries</string>
     <string name="action_save">Save</string>
     <string name="action_delete">Delete</string>
