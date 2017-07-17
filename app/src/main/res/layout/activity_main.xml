@@ -26,7 +26,8 @@
             android:layout_centerHorizontal="true"
             android:fontFamily="sans-serif-medium"
             android:paddingTop="16dp"
-            android:text="To add new product clicl on the plus button."
+            android:text="@string/empty_view"
+            android:textColor="@color/colorText"
             android:textAppearance="?android:textAppearanceMedium"/>
 
         </RelativeLayout>
@@ -38,5 +39,5 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_add_circle_black_24dp"/>
+        android:src="@drawable/ic_add_black_24dp"/>
 </RelativeLayout>

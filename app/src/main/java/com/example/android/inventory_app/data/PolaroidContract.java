@@ -22,26 +22,24 @@ public final class PolaroidContract {
     // stores the path for each of the tables
     public static final String PATH_POLAROIDS = "polaroids";
 
-    //Inner class that defines constant values for the pets database table.
-
+    //Inner class that defines constant values for the polaroids database table.
     public static final class PolaroidEntry implements BaseColumns {
 
         //The content URI to access the polaroid data in the provider
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_POLAROIDS);
 
-        //The MIME type of the {@link #CONTENT_URI} for a list of pets.
+        //The MIME type of the {@link #CONTENT_URI} for a list of polaroids.
         public static final String CONTENT_LIST_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_POLAROIDS;
 
-        //The MIME type of the {@link #CONTENT_URI} for a single pet.
+        //The MIME type of the {@link #CONTENT_URI} for a single polaroids.
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_POLAROIDS;
 
-        //Name of database table for pets
+        //Name of database table for polaroids
         public final static String TABLE_NAME = "polaroids";
 
-
-        //Unique ID number for the pet (only for use in the database table).
+        //Unique ID number for the polaroid (only for use in the database table).
         // Type: INTEGER
         public final static String _ID = BaseColumns._ID;
 
@@ -49,7 +47,6 @@ public final class PolaroidContract {
         // Name of the polaroid.
         //Type: TEXT
         public final static String COLUMN_POLAROID_NAME = "name";
-
 
         // Quantity on stock
         // Type: INTEGER

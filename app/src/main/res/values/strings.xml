@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Inventory_App</string>
+    <string name="app_name">Inventory App</string>
     <string name="category_overview">Overview</string>
     <string name="hint_product_name">Product Name</string>
     <string name="product_info">Product info</string>
@@ -28,11 +28,13 @@
     <string name="editor_delete_product_successful">Delete successful.</string>
     <string name="editor_delete_product_failed">Delete failed.</string>
     <string name="unknown_price">Price unknown</string>
-    <string name="editor_no_available_products">No available products.</string>
+    <string name="editor_no_available_products">Product is not available.</string>
     <string name="mail_subject">Ordering</string>
     <string name="adapter_update_product_failed">Update quantity by sell button failed.</string>
     <string name="adapter_update_product_successful">Update quantity by sell button successful.</string>
     <string name="editor_image_not_inserted">Image not inserted.</string>
-
+    <string name="empty_view">To add new product click on the + button.</string>
+    <string name="name_dialog">Enter name of product.</string>
+    <string name="ok_dialog">OK</string>
 
 </resources>

@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
+
 import com.example.android.inventory_app.data.PolaroidContract.PolaroidEntry;
 
 import static android.icu.lang.UCharacter.JoiningGroup.PE;
@@ -20,16 +21,23 @@ public class PolaroidProvider extends ContentProvider {
     // database helper object
     private PolaroidDbHelper mDbHelper;
 
-    /** Tag for the log messages */
+    /**
+     * Tag for the log messages
+     */
     public static final String LOG_TAG = PolaroidProvider.class.getSimpleName();
 
-    /** URI matcher code for the content URI for the whole table */
+    /**
+     * URI matcher code for the content URI for the whole table
+     */
     public static final int POLAROIDS = 100;
 
-    /** URI matcher code for the content URI for a single row in the table */
+    /**
+     * URI matcher code for the content URI for a single row in the table
+     */
     public static final int POLAROID_ID = 101;
 
-    /** URI matcher object to match a context URI to a corresponding code.
+    /**
+     * URI matcher object to match a context URI to a corresponding code.
      * The input passed into the constructor represents the code to return for the root URI.
      * It's common to use NO_MATCH as the input for this case.
      */
@@ -66,7 +74,6 @@ public class PolaroidProvider extends ContentProvider {
     }
 
     //Perform the query for the given URI. Use the given projection, selection, selection arguments, and sort order.
-
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
@@ -96,7 +103,7 @@ public class PolaroidProvider extends ContentProvider {
                 // arguments that will fill in the "?". Since we have 1 question mark in the
                 // selection, we have 1 String in the selection arguments' String array.
                 selection = PolaroidEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
 
                 // This will perform a query on the table where the _id equals 3 to return a
                 // Cursor containing that row of the table.
@@ -109,12 +116,10 @@ public class PolaroidProvider extends ContentProvider {
 
         // Set notification uri on the cursor
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
-
         return cursor;
     }
 
     //Insert new data into the provider with the given ContentValues.
-
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
         final int match = sUriMatcher.match(uri);
@@ -139,14 +144,14 @@ public class PolaroidProvider extends ContentProvider {
 
         // Check that the quantity is not null
         Integer quantity = values.getAsInteger(PolaroidEntry.COLUMN_POLAROID_QTY);
-        if (quantity == null ) {
+        if (quantity == null) {
             throw new IllegalArgumentException("Polaroid requires quantity");
         }
 
         // Get writeable database
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
-        // Insert the new pet with the given values
+        // Insert the new product with the given values
         long id = database.insert(PolaroidEntry.TABLE_NAME, null, values);
         // If the ID is -1, then the insertion failed. Log an error and return null.
         if (id == -1) {
@@ -154,7 +159,7 @@ public class PolaroidProvider extends ContentProvider {
             return null;
         }
 
-        // Notify all listeners that the data has changed for the pet content uri
+        // Notify all listeners that the data has changed for the product content uri
         getContext().getContentResolver().notifyChange(uri, null);
 
         // Return the new URI with the ID (of the newly inserted row) appended at the end
@@ -176,7 +181,7 @@ public class PolaroidProvider extends ContentProvider {
                 // so we know which row to update. Selection will be "_id=?" and selection
                 // arguments will be a String array containing the actual ID.
                 selection = PolaroidEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 return updatePolaroid(uri, contentValues, selection, selectionArgs);
             default:
                 throw new IllegalArgumentException("Update is not supported for " + uri);
@@ -195,15 +200,6 @@ public class PolaroidProvider extends ContentProvider {
             String name = values.getAsString(PolaroidEntry.COLUMN_POLAROID_NAME);
             if (name == null) {
                 throw new IllegalArgumentException("Polaroid requires a name");
-            }
-        }
-
-        // If the quantity key is present,
-        // check that the it is not null.
-        if(values.containsKey(PolaroidEntry.COLUMN_POLAROID_QTY)){
-            Integer quantity = values.getAsInteger(PolaroidEntry.COLUMN_POLAROID_QTY);
-            if (quantity == null) {
-                throw new IllegalArgumentException("Polaroid requires quantity");
             }
         }
 
@@ -228,9 +224,7 @@ public class PolaroidProvider extends ContentProvider {
         return rowsUpdated;
     }
 
-
-     //Delete the data at the given selection and selection arguments.
-
+    //Delete the data at the given selection and selection arguments.
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         // Get writeable database
@@ -244,7 +238,7 @@ public class PolaroidProvider extends ContentProvider {
                 rowsDeleted = database.delete(PolaroidEntry.TABLE_NAME, selection, selectionArgs);
                 // Delete all rows that match the selection and selection args
 
-                if(rowsDeleted !=0){
+                if (rowsDeleted != 0) {
                     getContext().getContentResolver().notifyChange(uri, null);
                 }
 
@@ -253,10 +247,10 @@ public class PolaroidProvider extends ContentProvider {
             case POLAROID_ID:
                 // Delete a single row given by the ID in the URI
                 selection = PolaroidEntry._ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 // Delete a single row given by the ID in the URI
                 rowsDeleted = database.delete(PolaroidEntry.TABLE_NAME, selection, selectionArgs);
-                if(rowsDeleted !=0){
+                if (rowsDeleted != 0) {
                     getContext().getContentResolver().notifyChange(uri, null);
                 }
                 return rowsDeleted;

@@ -155,50 +155,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         //Set proper visibility for image button - different for edit and upload mode
         if (mCurrentPolaroidUri == null) {
             editPictureButton.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             uploadPictureButton.setVisibility(View.GONE);
         }
     }
-
-    /**
-     * Setup the dropdown spinner that allows the user to select the gender of the pet.
-     * <p>
-     * private void setupSpinner() {
-     * // Create adapter for spinner. The list options are from the String array it will use
-     * // the spinner will use the default layout
-     * ArrayAdapter genderSpinnerAdapter = ArrayAdapter.createFromResource(this,
-     * R.array.array_gender_options, android.R.layout.simple_spinner_item);
-     * <p>
-     * // Specify dropdown layout style - simple list view with 1 item per line
-     * genderSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-     * <p>
-     * // Apply the adapter to the spinner
-     * mGenderSpinner.setAdapter(genderSpinnerAdapter);
-     * <p>
-     * // Set the integer mSelected to the constant values
-     * mGenderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-     *
-     * @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-     * String selection = (String) parent.getItemAtPosition(position);
-     * if (!TextUtils.isEmpty(selection)) {
-     * if (selection.equals(getString(R.string.gender_male))) {
-     * mGender = PetEntry.GENDER_MALE; // Male
-     * } else if (selection.equals(getString(R.string.gender_female))) {
-     * mGender = PetEntry.GENDER_FEMALE; // Female
-     * } else {
-     * mGender = PetEntry.GENDER_UNKNOWN; // Unknown
-     * }
-     * }
-     * }
-     * <p>
-     * // Because AdapterView is an abstract class, onNothingSelected must be defined
-     * @Override public void onNothingSelected(AdapterView<?> parent) {
-     * mGender = 0; // Unknown
-     * }
-     * });
-     * }
-     */
 
     // Gets user input from the editor and saves new polaroid into a database
     private void savePolaroid() {
@@ -215,26 +175,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             return;
         }
 
-        // request at least name to be inserted
-        if(nameString.isEmpty())
-        {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("At least Name of the product must be inserted.")
-                .setCancelable(false)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                    // TODO: how to ensure to stay in the EditorActivity?
-                    }
-                });
-        AlertDialog alert = builder.create();
-        alert.show();}
-
-
         // when there is no image uploaded
         String imageUriString = null;
-        if(mUri != null){
+        if (mUri != null) {
             imageUriString = mUri.toString();
-        }else{
+        } else {
             Log.v(LOG_TAG, getString(R.string.editor_image_not_inserted));
         }
 
@@ -248,7 +193,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         values.put(PolaroidEntry.COLUMN_POLAROID_PICTURE, imageUriString);
 
         // If the price is not provided by the user, don't try to parse the string into an
-        // integer value. Use 0 by default.
+        // integer value. Use 0 by default and display "Price unknown"
         int price = 0;
         if (!TextUtils.isEmpty(priceString)) {
             price = Integer.parseInt(priceString);
@@ -266,7 +211,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         if (mCurrentPolaroidUri == null) {
 
-        // Insert the new row, returning the primary key value of the new row
+            // Insert the new row, returning the primary key value of the new row
             Uri newUri = getContentResolver().insert(PolaroidEntry.CONTENT_URI, values);
 
             if (newUri == null) {
@@ -290,7 +235,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 Toast.makeText(this, getString(R.string.editor_update_product_successful),
                         Toast.LENGTH_SHORT).show();
             }
-
         }
     }
 
@@ -322,7 +266,22 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 // Save polaroid to db
                 savePolaroid();
                 //Exit activity
-                finish();
+
+                // request at least name to be inserted
+                String nameString = mNameEditText.getText().toString().trim();
+                if (nameString.isEmpty()) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setMessage(R.string.name_dialog)
+                            .setCancelable(false)
+                            .setPositiveButton(R.string.ok_dialog, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                }
+                            });
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                } else {
+                    finish();
+                }
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
@@ -379,7 +338,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         showUnsavedChangesDialog(discardButtonClickListener);
     }
 
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // Now create and return a CursorLoader that will take care of
@@ -402,7 +360,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 null,                   // No selection clause
                 null,                   // No selection arguments
                 null);                  // Default sort order
-
     }
 
     @Override
@@ -425,13 +382,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             // when picture is not uploaded
             String pictureString = cursor.getString(pictureColumnIndex);
-             if (pictureString !=null){
+            if (pictureString != null) {
                 Uri imageUri = Uri.parse(pictureString);
                 Bitmap imageBitmap = getBitmapFromUri(imageUri);
                 mProductImageView.setImageBitmap(imageBitmap);
-            }
-            else {
-                Log.v(LOG_TAG,getString(R.string.editor_image_not_inserted));
+            } else {
+                Log.v(LOG_TAG, getString(R.string.editor_image_not_inserted));
             }
 
             // Update the views on the screen with the values from the database
@@ -442,7 +398,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
-
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 // If the loader is invalidated, clear out all the data from the input fields.
@@ -450,7 +405,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mQuantityEditText.setText("");
         mPriceEditText.setText("");
         mSupplierEditText.setText("");
-       mProductImageView.setImageBitmap(null);
+        mProductImageView.setImageBitmap(null);
     }
 
     private void showUnsavedChangesDialog(
@@ -537,8 +492,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             // Otherwise, the update was successful and we can log it.
             Log.v(LOG_TAG, getString(R.string.editor_update_product_successful));
         }
-
-
     }
 
     // method for - button - decrease of quantity
@@ -654,10 +607,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             try {
                 input.close();
             } catch (IOException ioe) {
-
             }
         }
     }
-
-
 }

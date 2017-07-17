@@ -28,18 +28,11 @@ import com.example.android.inventory_app.data.PolaroidProvider;
 
 import static android.drm.DrmStore.DrmObjectType.CONTENT;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
-
-
-
-    // TODO: zkontrolovat checky na prazdne policka
-    //TODO: price unknown - zobrazovat
-    // TODO: grafiku doresit
-    // TODO: zkontrolovat pet jestli tam neni
-    // TODO: zarovnat a vycistut
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int POLAROID_LOADER = 0;
     PolaroidCursorAdapter mCursorAdapter;
+    public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 startActivity(intent);
             }
         });
-
     }
 
     private void insertPolaroid() {
@@ -101,13 +93,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         values.put(PolaroidEntry.COLUMN_POLAROID_SUPPLIER, "supply@polaroid.com");
         values.put(PolaroidEntry.COLUMN_POLAROID_PICTURE, "content://com.android.providers.media.documents/document/image%3A47343");
 
-
-
 // Insert the new row, returning the primary key value of the new row
         Uri newUri = getContentResolver().insert(PolaroidEntry.CONTENT_URI, values);
-        Log.v("CatalogActivity", "New URI: " + newUri);
+        Log.v(LOG_TAG, "New URI: " + newUri);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -151,7 +140,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 null,                                    // The columns for the WHERE clause
                 null,                                     // The values for the WHERE clause
                 null);                                   //sort order
-
     }
 
     @Override
@@ -168,13 +156,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     /**
-     * Helper method to delete all pets in the database.
+     * Helper method to delete all products in the database.
      */
     private void deleteAllPolaroids() {
         int rowsDeleted = getContentResolver().delete(PolaroidEntry.CONTENT_URI, null, null);
-        Log.v("MainActivity", rowsDeleted + " rows deleted from polaroid database");
+        Log.v(LOG_TAG, rowsDeleted + " rows deleted from polaroid database");
     }
-
-
 }
 

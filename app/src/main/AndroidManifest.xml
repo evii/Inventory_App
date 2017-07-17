@@ -29,8 +29,5 @@
             android:name=".data.PolaroidProvider"
             android:authorities="com.example.android.inventory_app"
             android:exported="false" />
-
-
     </application>
-
 </manifest>
