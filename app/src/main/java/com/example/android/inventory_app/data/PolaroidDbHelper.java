@@ -12,8 +12,6 @@ import com.example.android.inventory_app.data.PolaroidContract.PolaroidEntry;
 
 public class PolaroidDbHelper extends SQLiteOpenHelper
 {
-    public static final String LOG_TAG = PolaroidDbHelper.class.getSimpleName();
-
     // database file
     private static final String DATABASE_NAME = "cameras.db";
 
@@ -33,8 +31,8 @@ public class PolaroidDbHelper extends SQLiteOpenHelper
         String SQL_CREATE_POLAROID_TABLE = "CREATE TABLE " + PolaroidEntry.TABLE_NAME + " ("
                 + PolaroidEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + PolaroidEntry.COLUMN_POLAROID_NAME + " TEXT NOT NULL, "
-                + PolaroidEntry.COLUMN_POLAROID_QTY + " INTEGER DEFAULT 0, "
-                + PolaroidEntry.COLUMN_POLAROID_PRICE + " REAL, "
+                + PolaroidEntry.COLUMN_POLAROID_QTY + " INTEGER NOT NULL DEFAULT 0, "
+                + PolaroidEntry.COLUMN_POLAROID_PRICE + " REAL NOT NULL, "
                 + PolaroidEntry.COLUMN_POLAROID_SUPPLIER + " TEXT, "
                 + PolaroidEntry.COLUMN_POLAROID_PICTURE + " TEXT);";
 

@@ -172,11 +172,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 TextUtils.isEmpty(nameString) && TextUtils.isEmpty(quantityString) &&
                 TextUtils.isEmpty(priceString) && TextUtils.isEmpty(supplierString)
                 && mUri == null) {
-            return;
+            finish();
         }
 
-        // when there is no image uploaded
-        String imageUriString = null;
+        // gets user inut from image upload
+        String imageUriString = "";
         if (mUri != null) {
             imageUriString = mUri.toString();
         } else {
@@ -192,49 +192,55 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         values.put(PolaroidEntry.COLUMN_POLAROID_SUPPLIER, supplierString);
         values.put(PolaroidEntry.COLUMN_POLAROID_PICTURE, imageUriString);
 
-        // If the price is not provided by the user, don't try to parse the string into an
-        // integer value. Use 0 by default and display "Price unknown"
-        int price = 0;
-        if (!TextUtils.isEmpty(priceString)) {
-            price = Integer.parseInt(priceString);
-        }
-        values.put(PolaroidEntry.COLUMN_POLAROID_PRICE, price);
 
-        // If the quantity is not provided by the user, don't try to parse the string into an
-        // integer value. Use 0 by default.
-        int quantity = 0;
-        if (!TextUtils.isEmpty(quantityString)) {
-            quantity = Integer.parseInt(quantityString);
-        }
-        values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantity);
-
-
+        // saving new product
         if (mCurrentPolaroidUri == null) {
 
-            // Insert the new row, returning the primary key value of the new row
-            Uri newUri = getContentResolver().insert(PolaroidEntry.CONTENT_URI, values);
+        //checks that required field are input : name, price, quantity, picture
+            if(nameString.isEmpty() || quantityString.isEmpty() ||
+                    priceString.isEmpty() || imageUriString.isEmpty()) {
+                Toast.makeText(this, getString(R.string.editor_required_fields), Toast.LENGTH_LONG).show();
 
-            if (newUri == null) {
-                Toast.makeText(this, getString(R.string.editor_insert_product_failed), Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, getString(R.string.editor_insert_product_successful), Toast.LENGTH_LONG).show();
             }
+            else {
+                // Insert the new row, returning the primary key value of the new row
+                Uri newUri = getContentResolver().insert(PolaroidEntry.CONTENT_URI, values);
+
+                if (newUri == null) {
+                    Toast.makeText(this, getString(R.string.editor_insert_product_failed), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, getString(R.string.editor_insert_product_successful), Toast.LENGTH_LONG).show();
+                    finish();
+                }
+            }
+
+
         } else {
             // Otherwise this is an EXISTING product, so update the polaropid with content URI: mCurrentPolaroidUri
             // and pass in the new ContentValues. Pass in null for the selection and selection args
             // because mCurrentPolaroidUri will already identify the correct row in the database that
             // we want to modify.
-            int rowsAffected = getContentResolver().update(mCurrentPolaroidUri, values, null, null);
-            // Show a toast message depending on whether or not the update was successful.
-            if (rowsAffected == 0) {
-                // If no rows were affected, then there was an error with the update.
-                Toast.makeText(this, getString(R.string.editor_update_product_failed),
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                // Otherwise, the update was successful and we can display a toast.
-                Toast.makeText(this, getString(R.string.editor_update_product_successful),
-                        Toast.LENGTH_SHORT).show();
+            if(mNameEditText.length() == 0 || mQuantityEditText.length() == 0 ||
+                    mPriceEditText.length() == 0 || Uri.EMPTY.equals(mUri)) {
+
+                Toast.makeText(this, getString(R.string.editor_required_fields), Toast.LENGTH_LONG).show();
+
             }
+            else{
+                int rowsAffected = getContentResolver().update(mCurrentPolaroidUri, values, null, null);
+                // Show a toast message depending on whether or not the update was successful.
+                if (rowsAffected == 0) {
+                    // If no rows were affected, then there was an error with the update.
+                    Toast.makeText(this, getString(R.string.editor_update_product_failed),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    // Otherwise, the update was successful and we can display a toast.
+                    Toast.makeText(this, getString(R.string.editor_update_product_successful),
+                            Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+
         }
     }
 
@@ -265,23 +271,23 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             case R.id.action_save:
                 // Save polaroid to db
                 savePolaroid();
-                //Exit activity
+
 
                 // request at least name to be inserted
-                String nameString = mNameEditText.getText().toString().trim();
-                if (nameString.isEmpty()) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setMessage(R.string.name_dialog)
-                            .setCancelable(false)
-                            .setPositiveButton(R.string.ok_dialog, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                }
-                            });
-                    AlertDialog alert = builder.create();
-                    alert.show();
-                } else {
-                    finish();
-                }
+              //  String nameString = mNameEditText.getText().toString().trim();
+              //  String quantityString = mQuantityEditText.getText().toString().trim();
+               // String priceString = mPriceEditText.getText().toString().trim();
+
+                //String imageUriString = mUri.toString();
+
+              //  if (nameString.isEmpty() || quantityString.isEmpty() || priceString.isEmpty()) {
+               //     Toast.makeText(this, "nahrej nazev, quantitu, cenu, nebo zemri", Toast.LENGTH_LONG).show();;
+
+
+              //  } else {
+                    //Exit activity
+                 //   finish();
+              //  }
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
@@ -388,7 +394,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 mProductImageView.setImageBitmap(imageBitmap);
             } else {
                 Log.v(LOG_TAG, getString(R.string.editor_image_not_inserted));
-            }
+                            }
 
             // Update the views on the screen with the values from the database
             mNameEditText.setText(name);
@@ -479,40 +485,33 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     // method for + button - increase of quantity
     public void increaseQuantity(View view) {
-        ContentValues values = new ContentValues();
-        int quantity = Integer.parseInt(mQuantityEditText.getText().toString());
-        quantity = quantity + 1;
-        values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantity);
-        int rowsAffected = getContentResolver().update(mCurrentPolaroidUri, values, null, null);
-        // Show a toast message depending on whether or not the update was successful.
-        if (rowsAffected == 0) {
-            // If no rows were affected, then there was an error with the update.
-            Log.v(LOG_TAG, getString(R.string.editor_update_product_failed));
-        } else {
-            // Otherwise, the update was successful and we can log it.
-            Log.v(LOG_TAG, getString(R.string.editor_update_product_successful));
+        String quantityString = mQuantityEditText.getText().toString().trim();
+        int quantity;
+        if (quantityString.matches("")){
+            quantity=0;
         }
+        else{
+            quantity = Integer.parseInt(quantityString);
+        }
+        quantity = quantity + 1;
+        mQuantityEditText.setText(String.valueOf(quantity));
     }
 
     // method for - button - decrease of quantity
     public void decreaseQuantity(View view) {
-        ContentValues values = new ContentValues();
-        int quantity = Integer.parseInt(mQuantityEditText.getText().toString());
-        quantity = quantity - 1;
+       String quantityString = mQuantityEditText.getText().toString().trim();
+        int quantity;
+    if(quantityString.matches("")){
+        quantity = 0;
+    }
+     else{
+        quantity = Integer.parseInt(quantityString);}
+            quantity = quantity - 1;
         if (quantity < 0) {
             quantity = 0;
             Toast.makeText(this, getString(R.string.editor_no_available_products), Toast.LENGTH_LONG).show();
         }
-        values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantity);
-        int rowsAffected = getContentResolver().update(mCurrentPolaroidUri, values, null, null);
-        // Show a toast message depending on whether or not the update was successful.
-        if (rowsAffected == 0) {
-            // If no rows were affected, then there was an error with the update.
-            Log.v(LOG_TAG, getString(R.string.editor_update_product_failed));
-        } else {
-            // Otherwise, the update was successful and we can log it.
-            Log.v(LOG_TAG, getString(R.string.editor_update_product_successful));
-        }
+        mQuantityEditText.setText(String.valueOf(quantity));
     }
 
     // method for Order button - intent with sending an order email
@@ -583,7 +582,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             int photoW = bmOptions.outWidth;
             int photoH = bmOptions.outHeight;
-
+Log.v(LOG_TAG, "rozmery vyska:" + photoH +"sirka:" + photoW);
             // Determine how much to scale down the image
             int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
 

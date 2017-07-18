@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.example.android.inventory_app.data.PolaroidContract.PolaroidEntry;
 
+import static android.R.attr.name;
 import static android.icu.lang.UCharacter.JoiningGroup.PE;
 
 /**
@@ -148,6 +149,19 @@ public class PolaroidProvider extends ContentProvider {
             throw new IllegalArgumentException("Polaroid requires quantity");
         }
 
+        // Check that the price is not null
+        Integer price = values.getAsInteger(PolaroidEntry.COLUMN_POLAROID_PRICE);
+        if (price == null) {
+            throw new IllegalArgumentException("Polaroid requires price");
+        }
+
+        // Check that the picture is inserted
+       // String imageUri = values.getAsString(PolaroidEntry.COLUMN_POLAROID_PICTURE);
+       // if (imageUri == null) {
+       //     throw new IllegalArgumentException("Polaroid requires a picture");
+      //  }
+
+
         // Get writeable database
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
@@ -202,6 +216,34 @@ public class PolaroidProvider extends ContentProvider {
                 throw new IllegalArgumentException("Polaroid requires a name");
             }
         }
+
+        // If the polaroid quantity key is present,
+        // check that the quantity value is not null.
+        if (values.containsKey(PolaroidEntry.COLUMN_POLAROID_QTY)) {
+            Integer quantity = values.getAsInteger(PolaroidEntry.COLUMN_POLAROID_QTY);
+            if (quantity == null) {
+                throw new IllegalArgumentException("Polaroid requires a quantity");
+            }
+        }
+
+        // If the polaroid price key is present,
+        // check that the price value is not null.
+        if (values.containsKey(PolaroidEntry.COLUMN_POLAROID_PRICE)) {
+            Integer price = values.getAsInteger(PolaroidEntry.COLUMN_POLAROID_PRICE);
+            if (price == null) {
+                throw new IllegalArgumentException("Polaroid requires a price");
+            }
+        }
+
+        // If the polaroid picture is present,
+        // check that the picture uri is not null.
+        if (values.containsKey(PolaroidEntry.COLUMN_POLAROID_PICTURE)) {
+            String pictureUri = values.getAsString(PolaroidEntry.COLUMN_POLAROID_PICTURE);
+            if (pictureUri == null) {
+                throw new IllegalArgumentException("Polaroid requires a picture");
+            }
+        }
+
 
         // If there are no values to update, then don't try to update the database
         if (values.size() == 0) {
