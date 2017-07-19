@@ -6,6 +6,7 @@ package com.example.android.inventory_app;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -38,6 +39,7 @@ import android.app.AlertDialog;
 import com.example.android.inventory_app.data.PolaroidContract.PolaroidEntry;
 import com.example.android.inventory_app.data.PolaroidProvider;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,25 +52,24 @@ import static android.R.id.message;
  */
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    /**
+     * Tag for the log messages
+     */
+    public static final String LOG_TAG = EditorActivity.class.getSimpleName();
+    private static final int EXISTING_POLAROID_LOADER = 0;
+    private static final int PICK_IMAGE_REQUEST = 0;
     //EditText field to enter the polaroid products name
     private EditText mNameEditText;
-
     //EditText field to enter the quantity of product
     private EditText mQuantityEditText;
-
     //EditText field to enter the peoduct's price
     private EditText mPriceEditText;
-
     //EditText field to enter the supplier
     private EditText mSupplierEditText;
-
-    private static final int EXISTING_POLAROID_LOADER = 0;
-
     // Content URI for the existing polaroid (null if it's a new polaroid)
     private Uri mCurrentPolaroidUri;
     // in editing mode - variable to listen to changes
     private boolean mPolaroidHasChanged = false;
-
     // OnTouchListener that listens for any user touches on a View, implying that they are
     // modifying the view, and we change the mPolaroidtHasChanged boolean to true.
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
@@ -78,18 +79,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             return false;
         }
     };
-
-    /**
-     * Tag for the log messages
-     */
-    public static final String LOG_TAG = EditorActivity.class.getSimpleName();
-
-    private static final int PICK_IMAGE_REQUEST = 0;
-
     // Uri of picture
-    private Uri mUri;
-
-    ImageView mProductImageView;
+    private String imageString;
+    private Uri mImageUri;
+    private ImageView mProductImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,43 +159,35 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         String quantityString = mQuantityEditText.getText().toString().trim();
         String priceString = mPriceEditText.getText().toString().trim();
         String supplierString = mSupplierEditText.getText().toString().trim();
-
-        // return if there is no data input while inserting a product
-        if (mCurrentPolaroidUri == null &&
-                TextUtils.isEmpty(nameString) && TextUtils.isEmpty(quantityString) &&
-                TextUtils.isEmpty(priceString) && TextUtils.isEmpty(supplierString)
-                && mUri == null) {
-            finish();
-        }
-
-        // gets user inut from image upload
-        String imageUriString = "";
-        if (mUri != null) {
-            imageUriString = mUri.toString();
-        } else {
-            Log.v(LOG_TAG, getString(R.string.editor_image_not_inserted));
+        if (mImageUri != null) {
+            imageString = mImageUri.toString();
         }
 
         // Create a ContentValues object where column names are the keys,
         // and product attributes are the values.
         ContentValues values = new ContentValues();
-        values.put(PolaroidEntry.COLUMN_POLAROID_NAME, nameString);
-        values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantityString);
-        values.put(PolaroidEntry.COLUMN_POLAROID_PRICE, priceString);
-        values.put(PolaroidEntry.COLUMN_POLAROID_SUPPLIER, supplierString);
-        values.put(PolaroidEntry.COLUMN_POLAROID_PICTURE, imageUriString);
-
+        if (mImageUri != null) {
+            values.put(PolaroidEntry.COLUMN_POLAROID_NAME, nameString);
+            values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantityString);
+            values.put(PolaroidEntry.COLUMN_POLAROID_PRICE, priceString);
+            values.put(PolaroidEntry.COLUMN_POLAROID_SUPPLIER, supplierString);
+            values.put(PolaroidEntry.COLUMN_POLAROID_PICTURE, imageString);
+        } else {
+            values.put(PolaroidEntry.COLUMN_POLAROID_NAME, nameString);
+            values.put(PolaroidEntry.COLUMN_POLAROID_QTY, quantityString);
+            values.put(PolaroidEntry.COLUMN_POLAROID_PRICE, priceString);
+            values.put(PolaroidEntry.COLUMN_POLAROID_SUPPLIER, supplierString);
+        }
 
         // saving new product
         if (mCurrentPolaroidUri == null) {
 
-        //checks that required field are input : name, price, quantity, picture
-            if(nameString.isEmpty() || quantityString.isEmpty() ||
-                    priceString.isEmpty() || imageUriString.isEmpty()) {
+            //checks that required field are input : name, price, quantity, picture
+            if (nameString.isEmpty() || quantityString.isEmpty() ||
+                    priceString.isEmpty() || mImageUri == null) {
                 Toast.makeText(this, getString(R.string.editor_required_fields), Toast.LENGTH_LONG).show();
 
-            }
-            else {
+            } else {
                 // Insert the new row, returning the primary key value of the new row
                 Uri newUri = getContentResolver().insert(PolaroidEntry.CONTENT_URI, values);
 
@@ -214,19 +199,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 }
             }
 
-
         } else {
             // Otherwise this is an EXISTING product, so update the polaropid with content URI: mCurrentPolaroidUri
             // and pass in the new ContentValues. Pass in null for the selection and selection args
             // because mCurrentPolaroidUri will already identify the correct row in the database that
             // we want to modify.
-            if(mNameEditText.length() == 0 || mQuantityEditText.length() == 0 ||
-                    mPriceEditText.length() == 0 || Uri.EMPTY.equals(mUri)) {
+            if (nameString.isEmpty() || quantityString.isEmpty() ||
+                    priceString.isEmpty()) {
 
                 Toast.makeText(this, getString(R.string.editor_required_fields), Toast.LENGTH_LONG).show();
 
-            }
-            else{
+            } else {
                 int rowsAffected = getContentResolver().update(mCurrentPolaroidUri, values, null, null);
                 // Show a toast message depending on whether or not the update was successful.
                 if (rowsAffected == 0) {
@@ -240,7 +223,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                     finish();
                 }
             }
-
         }
     }
 
@@ -271,23 +253,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             case R.id.action_save:
                 // Save polaroid to db
                 savePolaroid();
-
-
-                // request at least name to be inserted
-              //  String nameString = mNameEditText.getText().toString().trim();
-              //  String quantityString = mQuantityEditText.getText().toString().trim();
-               // String priceString = mPriceEditText.getText().toString().trim();
-
-                //String imageUriString = mUri.toString();
-
-              //  if (nameString.isEmpty() || quantityString.isEmpty() || priceString.isEmpty()) {
-               //     Toast.makeText(this, "nahrej nazev, quantitu, cenu, nebo zemri", Toast.LENGTH_LONG).show();;
-
-
-              //  } else {
-                    //Exit activity
-                 //   finish();
-              //  }
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
@@ -387,14 +352,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             String supplier = cursor.getString(supplierColumnIndex);
 
             // when picture is not uploaded
-            String pictureString = cursor.getString(pictureColumnIndex);
-            if (pictureString != null) {
-                Uri imageUri = Uri.parse(pictureString);
+            String imageString = cursor.getString(pictureColumnIndex);
+            if (imageString != null) {
+                Uri imageUri = Uri.parse(imageString);
                 Bitmap imageBitmap = getBitmapFromUri(imageUri);
                 mProductImageView.setImageBitmap(imageBitmap);
             } else {
                 Log.v(LOG_TAG, getString(R.string.editor_image_not_inserted));
-                            }
+            }
 
             // Update the views on the screen with the values from the database
             mNameEditText.setText(name);
@@ -421,15 +386,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.unsaved_changes_dialog_msg);
         builder.setPositiveButton(R.string.discard, discardButtonClickListener);
-        builder.setNegativeButton(R.string.keep_editing, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Keep editing" button, so dismiss the dialog
-                // and continue editing the product.
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
-            }
-        });
+        builder.setNegativeButton(R.string.keep_editing, null);
 
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create();
@@ -447,15 +404,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 deletePolaroid();
             }
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Cancel" button, so dismiss the dialog
-                // and continue editing the product.
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
-            }
-        });
+        builder.setNegativeButton(R.string.cancel, null);
 
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create();
@@ -487,10 +436,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     public void increaseQuantity(View view) {
         String quantityString = mQuantityEditText.getText().toString().trim();
         int quantity;
-        if (quantityString.matches("")){
-            quantity=0;
-        }
-        else{
+        if (quantityString.matches("")) {
+            quantity = 0;
+        } else {
             quantity = Integer.parseInt(quantityString);
         }
         quantity = quantity + 1;
@@ -499,14 +447,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     // method for - button - decrease of quantity
     public void decreaseQuantity(View view) {
-       String quantityString = mQuantityEditText.getText().toString().trim();
+        String quantityString = mQuantityEditText.getText().toString().trim();
         int quantity;
-    if(quantityString.matches("")){
-        quantity = 0;
-    }
-     else{
-        quantity = Integer.parseInt(quantityString);}
-            quantity = quantity - 1;
+        if (quantityString.matches("")) {
+            quantity = 0;
+        } else {
+            quantity = Integer.parseInt(quantityString);
+        }
+        quantity = quantity - 1;
         if (quantity < 0) {
             quantity = 0;
             Toast.makeText(this, getString(R.string.editor_no_available_products), Toast.LENGTH_LONG).show();
@@ -554,9 +502,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             // provided to this method as a parameter.  Pull that uri using "resultData.getData()"
 
             if (resultData != null) {
-                mUri = resultData.getData();
-                Log.i(LOG_TAG, "Uri of picture: " + mUri.toString());
-                mProductImageView.setImageBitmap(getBitmapFromUri(mUri));
+                mImageUri = resultData.getData();
+                Log.i(LOG_TAG, "Uri of picture: " + mImageUri.toString());
+                imageString = mImageUri.toString();
+                mProductImageView.setImageBitmap(getBitmapFromUri(mImageUri));
             }
         }
     }
@@ -582,7 +531,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
             int photoW = bmOptions.outWidth;
             int photoH = bmOptions.outHeight;
-Log.v(LOG_TAG, "rozmery vyska:" + photoH +"sirka:" + photoW);
             // Determine how much to scale down the image
             int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
 
@@ -609,4 +557,5 @@ Log.v(LOG_TAG, "rozmery vyska:" + photoH +"sirka:" + photoW);
             }
         }
     }
+
 }

@@ -43,7 +43,6 @@ public final class PolaroidContract {
         // Type: INTEGER
         public final static String _ID = BaseColumns._ID;
 
-
         // Name of the polaroid.
         //Type: TEXT
         public final static String COLUMN_POLAROID_NAME = "name";

@@ -156,10 +156,10 @@ public class PolaroidProvider extends ContentProvider {
         }
 
         // Check that the picture is inserted
-       // String imageUri = values.getAsString(PolaroidEntry.COLUMN_POLAROID_PICTURE);
-       // if (imageUri == null) {
-       //     throw new IllegalArgumentException("Polaroid requires a picture");
-      //  }
+        String imageUri = values.getAsString(PolaroidEntry.COLUMN_POLAROID_PICTURE);
+        if (imageUri == null) {
+            throw new IllegalArgumentException("Polaroid requires a picture");
+        }
 
 
         // Get writeable database

@@ -10,8 +10,7 @@ import com.example.android.inventory_app.data.PolaroidContract.PolaroidEntry;
  * Created by evi on 14. 7. 2017.
  */
 
-public class PolaroidDbHelper extends SQLiteOpenHelper
-{
+public class PolaroidDbHelper extends SQLiteOpenHelper {
     // database file
     private static final String DATABASE_NAME = "cameras.db";
 

@@ -33,6 +33,6 @@
     <string name="adapter_update_product_successful">Update quantity by sell button successful.</string>
     <string name="editor_image_not_inserted">Image not inserted.</string>
     <string name="empty_view">To add new product click on the + button.</string>
-    <string name="editor_required_fields">Name, quantity, price and picture are required field.</string>
+    <string name="editor_required_fields">Name, quantity, price and picture are required fields.</string>
 
 </resources>
