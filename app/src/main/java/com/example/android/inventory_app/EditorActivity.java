@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
@@ -27,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -351,12 +353,21 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             int price = cursor.getInt(priceColumnIndex);
             String supplier = cursor.getString(supplierColumnIndex);
 
+
             // when picture is not uploaded
             String imageString = cursor.getString(pictureColumnIndex);
             if (imageString != null) {
-                Uri imageUri = Uri.parse(imageString);
-                Bitmap imageBitmap = getBitmapFromUri(imageUri);
-                mProductImageView.setImageBitmap(imageBitmap);
+                final Uri imageUri = Uri.parse(imageString);
+
+                ViewTreeObserver viewTreeObserver = mProductImageView.getViewTreeObserver();
+                viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mProductImageView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        mProductImageView.setImageBitmap(getBitmapFromUri(imageUri));
+                    }
+                });
+
             } else {
                 Log.v(LOG_TAG, getString(R.string.editor_image_not_inserted));
             }
@@ -490,6 +501,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         // The ACTION_OPEN_DOCUMENT intent was sent with the request code READ_REQUEST_CODE.
@@ -504,6 +516,16 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             if (resultData != null) {
                 mImageUri = resultData.getData();
                 Log.i(LOG_TAG, "Uri of picture: " + mImageUri.toString());
+
+                //permissions for displaying an image after reopening
+                int takeFlags = resultData.getFlags();
+                takeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                try {
+                    getContentResolver().takePersistableUriPermission(mImageUri, takeFlags);
+                } catch (SecurityException e) {
+                    e.printStackTrace();
+                }
+
                 imageString = mImageUri.toString();
                 mProductImageView.setImageBitmap(getBitmapFromUri(mImageUri));
             }
@@ -552,7 +574,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             return null;
         } finally {
             try {
-                input.close();
+                if (input != null) {
+                    input.close();
+                }
             } catch (IOException ioe) {
             }
         }
